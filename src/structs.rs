@@ -8,8 +8,6 @@ pub struct VideoInfo {
     #[serde(rename = "hlsManifestUrl")]
     pub hls_manifest_url: Option<String>,
     pub formats: Vec<VideoFormat>,
-    #[serde(rename = "relatedVideos")]
-    pub related_videos: Vec<RelatedVideo>,
     #[serde(rename = "videoDetails")]
     pub video_details: VideoDetails,
 }

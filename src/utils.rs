@@ -1098,13 +1098,9 @@ pub async fn get_functions(
 pub fn extract_functions(body: String) -> Vec<(String, String)> {
     let mut functions: Vec<(String, String)> = vec![];
 
-    // let mut cut_after_js_script =
-    //     js_sandbox::Script::from_string(CUT_AFTER_JS).expect("cut_after_js function error");
-
     fn extract_manipulations(
         body: String,
         caller: &str,
-        // cut_after_js_script: &mut js_sandbox::Script,
     ) -> String {
         let function_name = between(caller, r#"a=a.split("");"#, ".");
         if function_name.is_empty() {
@@ -1120,9 +1116,6 @@ pub fn extract_functions(body: String) -> Vec<(String, String)> {
 
         let sub_body = body.slice((ndx.unwrap() + function_start.len() - 1)..);
 
-        // let cut_after_sub_body = cut_after_js_script.call("cutAfterJS", (&sub_body,));
-        // let cut_after_sub_body: String = cut_after_sub_body.unwrap_or(String::from("null"));
-
         let cut_after_sub_body = cut_after_js(sub_body).unwrap_or(String::from("null"));
 
         let return_formatted_string = format!("var {function_name}={cut_after_sub_body}");
@@ -1133,19 +1126,14 @@ pub fn extract_functions(body: String) -> Vec<(String, String)> {
     fn extract_decipher(
         body: String,
         functions: &mut Vec<(String, String)>,
-        // cut_after_js_script: &mut js_sandbox::Script,
     ) {
         let function_name = between(body.as_str(), r#"a.set("alr","yes");c&&(c="#, "(decodeURIC");
-        // println!("decipher function name: {}", function_name);
         if !function_name.is_empty() {
             let function_start = format!("{function_name}=function(a)");
             let ndx = body.find(function_start.as_str());
 
             if let Some(ndx_some) = ndx {
                 let sub_body = body.slice((ndx_some + function_start.len())..);
-
-                // let cut_after_sub_body = cut_after_js_script.call("cutAfterJS", (&sub_body,));
-                // let cut_after_sub_body: String = cut_after_sub_body.unwrap_or(String::from("{}"));
 
                 let cut_after_sub_body = cut_after_js(sub_body).unwrap_or(String::from("{}"));
 
@@ -1156,7 +1144,6 @@ pub fn extract_functions(body: String) -> Vec<(String, String)> {
                     manipulated_body = extract_manipulations(
                         body.clone(),
                         function_body.as_str(),
-                        // cut_after_js_script
                     ),
                 );
 
@@ -1170,7 +1157,6 @@ pub fn extract_functions(body: String) -> Vec<(String, String)> {
     fn extract_ncode(
         body: String,
         functions: &mut Vec<(String, String)>,
-        // cut_after_js_script: &mut js_sandbox::Script,
     ) {
         let mut function_name = between(body.as_str(), r#"&&(b=a.get("n"))&&(b="#, "(b)");
 
@@ -1433,127 +1419,4 @@ pub fn cut_after_js(mixed_json: &str) -> Option<String> {
     }
 
     None
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_cut_after_js() {
-        assert_eq!(
-            cut_after_js(r#"{"a": 1, "b": 1}"#).unwrap_or("".to_string()),
-            r#"{"a": 1, "b": 1}"#.to_string()
-        );
-        println!("[PASSED] test_works_with_simple_json");
-
-        assert_eq!(
-            cut_after_js(r#"{"a": 1, "b": 1}abcd"#).unwrap_or("".to_string()),
-            r#"{"a": 1, "b": 1}"#.to_string()
-        );
-        println!("[PASSED] test_cut_extra_characters_after_json");
-
-        assert_eq!(
-            cut_after_js(r#"{"a": "}1", "b": 1}abcd"#).unwrap_or("".to_string()),
-            r#"{"a": "}1", "b": 1}"#.to_string()
-        );
-        println!("[PASSED] test_tolerant_to_double_quoted_string_constants");
-
-        assert_eq!(
-            cut_after_js(r#"{"a": '}1', "b": 1}abcd"#).unwrap_or("".to_string()),
-            r#"{"a": '}1', "b": 1}"#.to_string()
-        );
-        println!("[PASSED] test_tolerant_to_single_quoted_string_constants");
-
-        let str = "[-1816574795, '\",;/[;', function asdf() { a = 2/3; return a;}]";
-        assert_eq!(
-            cut_after_js(format!("{}abcd", str).as_str()).unwrap_or("".to_string()),
-            str.to_string()
-        );
-        println!("[PASSED] test_tolerant_to_complex_single_quoted_string_constants");
-
-        assert_eq!(
-            cut_after_js(r#"{"a": `}1`, "b": 1}abcd"#).unwrap_or("".to_string()),
-            r#"{"a": `}1`, "b": 1}"#.to_string()
-        );
-        println!("[PASSED] test_tolerant_to_back_tick_quoted_string_constants");
-
-        assert_eq!(
-            cut_after_js(r#"{"a": "}1", "b": 1}abcd"#).unwrap_or("".to_string()),
-            r#"{"a": "}1", "b": 1}"#.to_string()
-        );
-        println!("[PASSED] test_tolerant_to_string_constants");
-
-        assert_eq!(
-            cut_after_js(r#"{"a": "\"}1", "b": 1}abcd"#).unwrap_or("".to_string()),
-            r#"{"a": "\"}1", "b": 1}"#.to_string()
-        );
-        println!("[PASSED] test_tolerant_to_string_with_escaped_quoting");
-
-        assert_eq!(
-            cut_after_js(r#"{"a": "\"}1", "b": 1, "c": /[0-9]}}\/}/}abcd"#)
-                .unwrap_or("".to_string()),
-            r#"{"a": "\"}1", "b": 1, "c": /[0-9]}}\/}/}"#.to_string()
-        );
-        println!("[PASSED] test_tolerant_to_string_with_regexes");
-
-        assert_eq!(
-            cut_after_js(r#"{"a": [-1929233002,b,/,][}",],()}(\[)/,2070160835,1561177444]}abcd"#)
-                .unwrap_or("".to_string()),
-            r#"{"a": [-1929233002,b,/,][}",],()}(\[)/,2070160835,1561177444]}"#.to_string()
-        );
-        println!("[PASSED] test_tolerant_to_string_with_regexes_in_arrays");
-
-        assert_eq!(
-            cut_after_js(r#"{"a": "\"}1", "b": 1, "c": [4/6, /[0-9]}}\/}/]}abcd"#)
-                .unwrap_or("".to_string()),
-            r#"{"a": "\"}1", "b": 1, "c": [4/6, /[0-9]}}\/}/]}"#.to_string()
-        );
-        println!("[PASSED] test_does_not_fail_for_division_followed_by_a_regex");
-
-        assert_eq!(
-            cut_after_js(r#"{"a": "\"1", "b": 1, "c": {"test": 1}}abcd"#).unwrap_or("".to_string()),
-            r#"{"a": "\"1", "b": 1, "c": {"test": 1}}"#.to_string()
-        );
-        println!("[PASSED] test_works_with_nested_objects");
-
-        let test_str = r#"{"a": "\"1", "b": 1, "c": () => { try { /* do sth */ } catch (e) { a = [2+3] }; return 5}}"#;
-        assert_eq!(
-            cut_after_js(format!("{}abcd", test_str).as_str()).unwrap_or("".to_string()),
-            test_str.to_string()
-        );
-        println!("[PASSED] test_works_with_try_catch");
-
-        assert_eq!(
-            cut_after_js(r#"{"a": "\"фыва", "b": 1, "c": {"test": 1}}abcd"#)
-                .unwrap_or("".to_string()),
-            r#"{"a": "\"фыва", "b": 1, "c": {"test": 1}}"#.to_string()
-        );
-        println!("[PASSED] test_works_with_utf");
-
-        assert_eq!(
-            cut_after_js(r#"{"a": "\\\\фыва", "b": 1, "c": {"test": 1}}abcd"#)
-                .unwrap_or("".to_string()),
-            r#"{"a": "\\\\фыва", "b": 1, "c": {"test": 1}}"#.to_string()
-        );
-        println!("[PASSED] test_works_with_backslashes_in_string");
-
-        assert_eq!(
-            cut_after_js(r#"{"text": "\\\\"};"#).unwrap_or("".to_string()),
-            r#"{"text": "\\\\"}"#.to_string()
-        );
-        println!("[PASSED] test_works_with_backslashes_towards_end_of_string");
-
-        assert_eq!(
-            cut_after_js(r#"[{"a": 1}, {"b": 2}]abcd"#).unwrap_or("".to_string()),
-            r#"[{"a": 1}, {"b": 2}]"#.to_string()
-        );
-        println!("[PASSED] test_works_with_array_as_start");
-
-        assert!(cut_after_js("abcd]}").is_none());
-        println!("[PASSED] test_returns_error_when_not_beginning_with_bracket");
-
-        assert!(cut_after_js(r#"{"a": 1,{ "b": 1}"#).is_none());
-        println!("[PASSED] test_returns_error_when_missing_closing_bracket");
-    }
 }

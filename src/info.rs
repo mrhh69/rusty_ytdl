@@ -3,7 +3,7 @@ use std::sync::Arc;
 use scraper::{Html, Selector};
 
 use crate::constants::{BASE_URL, FORMATS};
-use crate::info_extras::{get_media, get_related_videos};
+use crate::info_extras::get_media;
 use crate::stream::{Stream, StreamOptions};
 use crate::structs::{VideoError, VideoFormat, VideoInfo, VideoOptions};
 
@@ -190,7 +190,6 @@ impl Video {
                 get_functions(get_html5player(response.as_str()).unwrap(), client).await?,
             )
             .unwrap_or(vec![]),
-            related_videos: get_related_videos(&initial_response).unwrap_or(vec![]),
             video_details,
         })
     }
