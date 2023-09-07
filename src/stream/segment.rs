@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-use super::media_format::MediaFormat;
 use super::remote_data::RemoteData;
 
 /// Type of media segment
@@ -8,7 +6,6 @@ pub struct Segment {
     pub data: RemoteData,
     pub discon_seq: u64,
     pub seq: u64,
-    pub format: MediaFormat,
     pub initialization: Option<RemoteData>,
 }
 

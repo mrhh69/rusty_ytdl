@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 
 use m3u8_rs::ByteRange;
 use reqwest::header::{self, HeaderMap};

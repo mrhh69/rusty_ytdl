@@ -14,7 +14,6 @@ use crate::structs::{
     VideoOptions, VideoQuality, VideoSearchOptions,
 };
 
-#[allow(dead_code)]
 pub fn get_cver(info: &serde_json::Value) -> &str {
     info.get("responseContext")
         .and_then(|x| x.get("serviceTrackingParams"))

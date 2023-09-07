@@ -10,7 +10,6 @@ use crate::VideoError;
 type Aes128CbcDec = cbc::Decryptor<aes::Aes128>;
 
 /// HLS encryption methods
-#[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub enum Encryption {
     None,

@@ -5,7 +5,6 @@ use m3u8_rs::parse_media_playlist;
 use tokio::sync::RwLock;
 
 use super::encryption::Encryption;
-use super::media_format::MediaFormat;
 use super::remote_data::RemoteData;
 use super::segment::Segment;
 

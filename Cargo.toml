@@ -52,6 +52,6 @@ tokio = { version = "1.26.0", features = ["full"] }
 
 [features]
 default = ["search", "live"]
-live = ["tokio/rt", "tokio/rt-multi-thread", "tokio/time", "tokio/sync", "tokio/process"]
+live = ["tokio/rt", "tokio/rt-multi-thread", "tokio/time", "tokio/sync"]
 blocking = []
 search = []

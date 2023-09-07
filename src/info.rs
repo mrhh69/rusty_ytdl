@@ -407,18 +407,15 @@ impl Video {
         self.video_id.clone()
     }
 
-    #[allow(dead_code)]
     pub(crate) fn get_client(&self) -> &reqwest_middleware::ClientWithMiddleware {
         &self.client
     }
 
-    #[allow(dead_code)]
     pub(crate) fn get_options(&self) -> VideoOptions {
         self.options.clone()
     }
 }
 
-#[allow(dead_code)]
 async fn get_dash_manifest(
     url: &str,
     client: &reqwest_middleware::ClientWithMiddleware,

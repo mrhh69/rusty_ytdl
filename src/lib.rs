@@ -1,6 +1,4 @@
 #![recursion_limit = "256"]
-#![allow(dead_code)]
-#![allow(unused_imports)]
 
 mod info;
 mod info_extras;
