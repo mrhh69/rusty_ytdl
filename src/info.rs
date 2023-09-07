@@ -170,21 +170,7 @@ impl Video {
             self.video_id.clone(),
         );
 
-        let dash_manifest_url = player_response
-            .get("streamingData")
-            .and_then(|x| x.get("dashManifestUrl"))
-            .and_then(|x| x.as_str())
-            .map(|x| x.to_string());
-
-        let hls_manifest_url = player_response
-            .get("streamingData")
-            .and_then(|x| x.get("hlsManifestUrl"))
-            .and_then(|x| x.as_str())
-            .map(|x| x.to_string());
-
         Ok(VideoInfo {
-            dash_manifest_url,
-            hls_manifest_url,
             formats: parse_video_formats(
                 &player_response,
                 get_functions(get_html5player(response.as_str()).unwrap(), client).await?,
@@ -200,99 +186,6 @@ impl Video {
         let client = &self.client;
 
         let mut info = self.get_basic_info().await?;
-
-        let has_manifest = info.dash_manifest_url.is_some() || info.hls_manifest_url.is_some();
-
-        if has_manifest && info.dash_manifest_url.is_some() {
-            // only support HLS-Formats for livestreams for now so all non-HLS streams will be ignored
-            //
-            // let url = info.dash_manifest_url.as_ref().unwrap();
-            // let mut dash_manifest_formats = get_dash_manifest(url, &client).await;
-
-            // for format in dash_manifest_formats.iter_mut() {
-            //     let format_as_object = format.as_object_mut();
-            //     if format_as_object.is_some() {
-            //         let format_as_object = format_as_object.unwrap();
-
-            //         // Insert url
-            //         format_as_object.insert(
-            //             "url".to_string(),
-            //             serde_json::Value::String(url.to_string()),
-            //         );
-
-            //         // Add other metadatas to format map
-            //         add_format_meta(format_as_object);
-
-            //         let format: Result<VideoFormat, serde_json::Error> =
-            //             serde_json::from_value(format.clone());
-            //         if format.is_err() {
-            //             continue;
-            //         }
-            //         info.formats.insert(info.formats.len(), format.unwrap());
-            //     }
-            // }
-        }
-
-        if has_manifest && info.hls_manifest_url.is_some() {
-            let url = info.hls_manifest_url.as_ref().expect("IMPOSSIBLE");
-            let unformated_formats = get_m3u8(url, client).await;
-
-            // Skip if error occured
-            if unformated_formats.is_ok() {
-                let unformated_formats = unformated_formats.expect("IMPOSSIBLE");
-
-                let default_formats = FORMATS.as_object().expect("IMPOSSIBLE");
-                // Push formated infos to formats
-                for (itag, url) in unformated_formats {
-                    let static_format = default_formats.get(&itag);
-                    if static_format.is_none() {
-                        continue;
-                    }
-                    let static_format = static_format.unwrap();
-
-                    let mut format = serde_json::json!({
-                        "itag": itag.parse::<i32>().unwrap_or(0),
-                        "mimeType": static_format.get("mimeType").expect("IMPOSSIBLE"),
-                    });
-
-                    let format_as_object_mut = format.as_object_mut().unwrap();
-
-                    if !static_format.get("qualityLabel").unwrap().is_null() {
-                        format_as_object_mut.insert(
-                            "qualityLabel".to_string(),
-                            static_format.get("qualityLabel").unwrap().clone(),
-                        );
-                    }
-
-                    if !static_format.get("bitrate").unwrap().is_null() {
-                        format_as_object_mut.insert(
-                            "bitrate".to_string(),
-                            static_format.get("bitrate").unwrap().clone(),
-                        );
-                    }
-
-                    if !static_format.get("audioBitrate").unwrap().is_null() {
-                        format_as_object_mut.insert(
-                            "audioBitrate".to_string(),
-                            static_format.get("audioBitrate").unwrap().clone(),
-                        );
-                    }
-
-                    // Insert stream url to format map
-                    format_as_object_mut.insert("url".to_string(), serde_json::Value::String(url));
-
-                    // Add other metadatas to format map
-                    add_format_meta(format_as_object_mut);
-
-                    let format: Result<VideoFormat, serde_json::Error> =
-                        serde_json::from_value(format);
-                    if format.is_err() {
-                        continue;
-                    }
-                    info.formats.push(format.unwrap());
-                }
-            }
-        }
 
         // Last sort formats
         info.formats.sort_by(sort_formats);

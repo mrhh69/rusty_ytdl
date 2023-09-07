@@ -3,10 +3,6 @@ use std::ops::{Bound, RangeBounds};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VideoInfo {
-    #[serde(rename = "dashManifestUrl")]
-    pub dash_manifest_url: Option<String>,
-    #[serde(rename = "hlsManifestUrl")]
-    pub hls_manifest_url: Option<String>,
     pub formats: Vec<VideoFormat>,
     #[serde(rename = "videoDetails")]
     pub video_details: VideoDetails,
