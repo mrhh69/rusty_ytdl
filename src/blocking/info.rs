@@ -3,7 +3,7 @@ use crate::structs::{VideoError, VideoInfo, VideoOptions};
 use crate::utils::choose_format;
 use crate::Video as AsyncVideo;
 
-use super::stream::{LiveStream, LiveStreamOptions, NonLiveStream, NonLiveStreamOptions, Stream};
+use super::stream::{Stream, StreamOptions};
 
 #[derive(Clone, Debug, derive_more::Display, PartialEq, Eq)]
 pub struct Video(AsyncVideo);
@@ -48,7 +48,7 @@ impl Video {
     ///           println!("{:#?}", chunk);
     ///     }
     /// ```
-    pub fn stream(&self) -> Result<Box<dyn Stream + Send + Sync>, VideoError> {
+    pub fn stream(&self) -> Result<Stream, VideoError> {
         let client = self.0.get_client();
 
         let options = self.0.get_options();
@@ -61,20 +61,6 @@ impl Video {
 
         if link.is_empty() {
             return Err(VideoError::VideoSourceNotFound);
-        }
-
-        // Only check for HLS formats for live streams
-        if format.is_hls {
-            let stream = LiveStream::new(LiveStreamOptions {
-                client: Some(client.clone()),
-                stream_url: link,
-            });
-
-            if stream.is_err() {
-                return Err(stream.err().unwrap());
-            }
-
-            return Ok(Box::new(stream.unwrap()));
         }
 
         let dl_chunk_size = if options.download_options.dl_chunk_size.is_some() {
@@ -105,7 +91,7 @@ impl Video {
             content_length = content_length_response.unwrap();
         }
 
-        let stream = NonLiveStream::new(NonLiveStreamOptions {
+        let stream = Stream::new(StreamOptions {
             client: Some(client.clone()),
             link,
             content_length,
@@ -118,12 +104,7 @@ impl Video {
             return Err(stream.err().unwrap());
         }
 
-        Ok(Box::new(stream.unwrap()))
-    }
-
-    /// Download video directly to the file
-    pub fn download<P: AsRef<std::path::Path>>(&self, path: P) -> Result<(), VideoError> {
-        Ok(block_async!(self.0.download(path))?)
+        Ok(stream.unwrap())
     }
 
     /// Get video URL

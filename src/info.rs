@@ -381,22 +381,6 @@ impl Video {
         Ok(stream.unwrap())
     }
 
-    /// Download video directly to the file
-    pub async fn download<P: AsRef<std::path::Path>>(&self, path: P) -> Result<(), VideoError> {
-        use std::io::Write;
-        let stream = self.stream().await.unwrap();
-
-        let mut file =
-            std::fs::File::create(path).map_err(|e| VideoError::DownloadError(e.to_string()))?;
-
-        while let Some(chunk) = stream.chunk().await.unwrap() {
-            file.write_all(&chunk)
-                .map_err(|e| VideoError::DownloadError(e.to_string()))?;
-        }
-
-        Ok(())
-    }
-
     /// Get video URL
     pub fn get_video_url(&self) -> String {
         format!("{}{}", BASE_URL, &self.video_id)

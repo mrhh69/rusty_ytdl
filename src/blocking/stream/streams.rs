@@ -1,11 +1,11 @@
-pub use crate::stream::{LiveStreamOptions, NonLiveStreamOptions};
+pub use crate::stream::StreamOptions;
 
 use crate::stream::{Stream as AsyncStream};
 use crate::{block_async, VideoError};
 
 pub struct Stream(AsyncStream);
 
-impl Stream for NonLiveStream {
+impl Stream {
     pub fn new(options: StreamOptions) -> Result<Self, VideoError> {
         Ok(Self(AsyncStream::new(options)?))
     }
@@ -19,7 +19,7 @@ impl Stream for NonLiveStream {
 }
 
 impl std::ops::Deref for Stream {
-    type Target = AsyncNonLiveStream;
+    type Target = AsyncStream;
 
     fn deref(&self) -> &Self::Target {
         &self.0
