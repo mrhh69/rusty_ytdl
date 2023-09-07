@@ -9,11 +9,11 @@ impl Stream {
     pub fn new(options: StreamOptions) -> Result<Self, VideoError> {
         Ok(Self(AsyncStream::new(options)?))
     }
-    fn chunk(&self) -> Result<Option<Vec<u8>>, VideoError> {
+    pub fn chunk(&self) -> Result<Option<Vec<u8>>, VideoError> {
         Ok(block_async!(self.0.chunk())?)
     }
 
-    fn content_length(&self) -> usize {
+    pub fn content_length(&self) -> usize {
         self.0.content_length() as usize
     }
 }

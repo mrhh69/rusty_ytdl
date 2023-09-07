@@ -4,7 +4,6 @@ use async_trait::async_trait;
 use m3u8_rs::parse_media_playlist;
 use tokio::sync::RwLock;
 
-use super::encryption::Encryption;
 use super::remote_data::RemoteData;
 use super::segment::Segment;
 

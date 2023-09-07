@@ -169,9 +169,6 @@ pub enum VideoError {
     /// Download error
     #[error("Download Error: {0}")]
     DownloadError(String),
-    /// Encryption error
-    #[error("Encryption Error: {0}")]
-    EncryptionError(String),
     /// Decryption error
     #[error("Decryption Error: {0}")]
     DecryptionError(String),
