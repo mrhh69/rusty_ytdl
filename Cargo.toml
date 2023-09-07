@@ -51,6 +51,5 @@ unicode-segmentation = "1.10.1"
 tokio = { version = "1.26.0", features = ["full"] }
 
 [features]
-default = ["search"]
+default = ["blocking"]
 blocking = []
-search = []

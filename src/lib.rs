@@ -11,9 +11,6 @@ pub mod stream;
 #[cfg(feature = "blocking")]
 pub mod blocking;
 
-#[cfg(feature = "search")]
-pub mod search;
-
 pub use info::Video;
 pub use structs::{
     Author, Chapter, ColorInfo, DownloadOptions, Embed, RangeObject, RelatedVideo, RequestOptions,
