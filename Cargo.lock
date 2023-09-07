@@ -1667,7 +1667,6 @@ dependencies = [
  "js-sandbox",
  "m3u8-rs",
  "once_cell",
- "rand 0.8.5",
  "regex",
  "reqwest",
  "reqwest-middleware",

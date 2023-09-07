@@ -107,22 +107,6 @@ pub struct RequestOptions {
     /// Some("key1=value1; key2=value2; key3=value3".to_string())
     /// ```
     pub cookies: Option<String>,
-    /// Custom IPv6 String
-    ///
-    /// # Example
-    /// ```ignore
-    ///     // Custom IPv6 block
-    ///     let ipv6_block = "2001:4::/48".to_string();
-
-    ///     let video_options = VideoOptions {
-    ///          request_options: RequestOptions {
-    ///               ipv6_block: Some(ipv6_block),
-    ///                ..Default::default()
-    ///          },
-    ///          ..Default::default()
-    ///     };
-    /// ```
-    pub ipv6_block: Option<String>,
 }
 
 #[derive(thiserror::Error, Debug)]

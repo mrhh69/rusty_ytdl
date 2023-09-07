@@ -1,11 +1,10 @@
-use rand::Rng;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use unicode_segmentation::UnicodeSegmentation;
 use urlencoding::decode;
 
 use crate::constants::{
-    AGE_RESTRICTED_URLS, AUDIO_ENCODING_RANKS, BASE_URL, ESCAPING_SEQUENZES, IPV6_REGEX,
+    AGE_RESTRICTED_URLS, AUDIO_ENCODING_RANKS, BASE_URL, ESCAPING_SEQUENZES,
     PARSE_INT_REGEX, VALID_QUERY_DOMAINS, VIDEO_ENCODING_RANKS,
 };
 use crate::info_extras::{get_author, get_chapters, get_dislikes, get_likes, get_storyboards};
@@ -1245,87 +1244,6 @@ pub async fn get_html(
     }
 
     Ok(response_first.unwrap())
-}
-
-/// Try to generate IPv6 with custom valid block
-/// # Example
-/// ```ignore
-/// let ipv6: std::net::IpAddr = get_random_v6_ip("2001:4::/48")?;
-/// ```
-pub fn get_random_v6_ip(ip: impl Into<String>) -> Result<std::net::IpAddr, VideoError> {
-    let ipv6_format: String = ip.into();
-
-    if !IPV6_REGEX.is_match(&ipv6_format) {
-        return Err(VideoError::InvalidIPv6Format);
-    }
-
-    let format_attr = ipv6_format.split('/').collect::<Vec<&str>>();
-    let raw_addr = format_attr.first();
-    let raw_mask = format_attr.get(1);
-
-    if raw_addr.is_none() || raw_mask.is_none() {
-        return Err(VideoError::InvalidIPv6Format);
-    }
-
-    let raw_addr = raw_addr.unwrap();
-    let raw_mask = raw_mask.unwrap();
-
-    let base_10_mask = raw_mask.parse::<u8>();
-    if base_10_mask.is_err() {
-        return Err(VideoError::InvalidIPv6Subnet);
-    }
-
-    let mut base_10_mask = base_10_mask.unwrap();
-
-    if !(24..=128).contains(&base_10_mask) {
-        return Err(VideoError::InvalidIPv6Subnet);
-    }
-
-    let base_10_addr = normalize_ip(*raw_addr);
-    let mut rng = rand::thread_rng();
-
-    let mut random_addr = [0u16; 8];
-    rng.fill(&mut random_addr);
-
-    for (idx, random_item) in random_addr.iter_mut().enumerate() {
-        // Calculate the amount of static bits
-        let static_bits = std::cmp::min(base_10_mask, 16);
-        base_10_mask -= static_bits;
-        // Adjust the bitmask with the static_bits
-        let mask = (0xffffu32 - ((2_u32.pow((16 - static_bits).into())) - 1)) as u16;
-        // Combine base_10_addr and random_item
-        let merged = (base_10_addr[idx] & mask) + (*random_item & (mask ^ 0xffff));
-
-        *random_item = merged;
-    }
-
-    Ok(std::net::IpAddr::from(random_addr))
-}
-
-pub fn normalize_ip(ip: impl Into<String>) -> Vec<u16> {
-    let ip: String = ip.into();
-    let parts = ip
-        .split("::")
-        .map(|x| x.split(':').collect::<Vec<&str>>())
-        .collect::<Vec<Vec<&str>>>();
-
-    let empty_array = vec![];
-    let part_start = parts.clone().get(0).unwrap_or(&empty_array).clone();
-    let mut part_end = parts.clone().get(1).unwrap_or(&empty_array).clone();
-
-    part_end.reverse();
-
-    let mut full_ip: Vec<u16> = vec![0, 0, 0, 0, 0, 0, 0, 0];
-
-    for i in 0..std::cmp::min(part_start.len(), 8) {
-        full_ip[i] = u16::from_str_radix(part_start[i], 16).unwrap_or(0)
-    }
-
-    for i in 0..std::cmp::min(part_end.len(), 8) {
-        full_ip[7 - i] = u16::from_str_radix(part_end[i], 16).unwrap_or(0)
-    }
-
-    full_ip
 }
 
 pub fn time_to_ms(duration: &str) -> usize {

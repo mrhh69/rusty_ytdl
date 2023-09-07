@@ -9,7 +9,7 @@ use crate::structs::{VideoError, VideoFormat, VideoInfo, VideoOptions};
 
 use crate::utils::{
     add_format_meta, choose_format, clean_video_details, get_functions, get_html, get_html5player,
-    get_random_v6_ip, get_video_id, is_not_yet_broadcasted, is_play_error, is_private_video,
+    get_video_id, is_not_yet_broadcasted, is_play_error, is_private_video,
     is_rental, parse_video_formats, sort_formats,
 };
 
@@ -70,11 +70,6 @@ impl Video {
 
         if options.request_options.proxy.is_some() {
             client = client.proxy(options.request_options.proxy.as_ref().unwrap().clone());
-        }
-
-        if options.request_options.ipv6_block.is_some() {
-            let ipv6 = get_random_v6_ip(options.request_options.ipv6_block.as_ref().unwrap())?;
-            client = client.local_address(ipv6);
         }
 
         if options.request_options.cookies.is_some() {
