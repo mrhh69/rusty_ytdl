@@ -6,7 +6,7 @@ use xml_oxide::{sax::parser::Parser, sax::Event};
 
 use crate::constants::{BASE_URL, FORMATS};
 use crate::info_extras::{get_media, get_related_videos};
-use crate::stream::{LiveStream, LiveStreamOptions, NonLiveStream, NonLiveStreamOptions, Stream};
+use crate::stream::{Stream, StreamOptions};
 use crate::structs::{VideoError, VideoFormat, VideoInfo, VideoOptions};
 
 use crate::utils::{
@@ -321,7 +321,7 @@ impl Video {
     ///           println!("{:#?}", chunk);
     ///     }
     /// ```
-    pub async fn stream(&self) -> Result<Box<dyn Stream + Send + Sync>, VideoError> {
+    pub async fn stream(&self) -> Result<Stream, VideoError> {
         let client = &self.client;
 
         let info = self.get_info().await?;
@@ -332,20 +332,6 @@ impl Video {
 
         if link.is_empty() {
             return Err(VideoError::VideoSourceNotFound);
-        }
-
-        // Only check for HLS formats for live streams
-        if format.is_hls {
-            let stream = LiveStream::new(LiveStreamOptions {
-                client: Some(client.clone()),
-                stream_url: link,
-            });
-
-            if stream.is_err() {
-                return Err(stream.err().unwrap());
-            }
-
-            return Ok(Box::new(stream.unwrap()));
         }
 
         let dl_chunk_size = if self.options.download_options.dl_chunk_size.is_some() {
@@ -379,7 +365,7 @@ impl Video {
             content_length = content_length_response.unwrap();
         }
 
-        let stream = NonLiveStream::new(NonLiveStreamOptions {
+        let stream = Stream::new(StreamOptions {
             client: Some(client.clone()),
             link,
             content_length,
@@ -392,7 +378,7 @@ impl Video {
             return Err(stream.err().unwrap());
         }
 
-        Ok(Box::new(stream.unwrap()))
+        Ok(stream.unwrap())
     }
 
     /// Download video directly to the file

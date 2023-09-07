@@ -1,33 +1,15 @@
 pub use crate::stream::{LiveStreamOptions, NonLiveStreamOptions};
 
-use crate::stream::{LiveStream as AsyncLiveStream, NonLiveStream as AsyncNonLiveStream};
+use crate::stream::{Stream as AsyncStream};
 use crate::{block_async, VideoError};
 
-pub trait Stream {
-    /// Stream a chunk of the [`u8`] bytes
-    ///
-    /// When the bytes has been exhausted, this will return `None`.
-    fn chunk(&self) -> Result<Option<Vec<u8>>, VideoError>;
-
-    /// Content length of the stream
-    ///
-    /// If stream is [`LiveStream`] returns always `0`
-    fn content_length(&self) -> usize {
-        0
-    }
-}
-
-pub struct NonLiveStream(AsyncNonLiveStream);
-
-impl NonLiveStream {
-    pub fn new(options: NonLiveStreamOptions) -> Result<Self, VideoError> {
-        Ok(Self(AsyncNonLiveStream::new(options)?))
-    }
-}
+pub struct Stream(AsyncStream);
 
 impl Stream for NonLiveStream {
+    pub fn new(options: StreamOptions) -> Result<Self, VideoError> {
+        Ok(Self(AsyncStream::new(options)?))
+    }
     fn chunk(&self) -> Result<Option<Vec<u8>>, VideoError> {
-        use crate::stream::Stream;
         Ok(block_async!(self.0.chunk())?)
     }
 
@@ -36,7 +18,7 @@ impl Stream for NonLiveStream {
     }
 }
 
-impl std::ops::Deref for NonLiveStream {
+impl std::ops::Deref for Stream {
     type Target = AsyncNonLiveStream;
 
     fn deref(&self) -> &Self::Target {
@@ -44,36 +26,7 @@ impl std::ops::Deref for NonLiveStream {
     }
 }
 
-impl std::ops::DerefMut for NonLiveStream {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-pub struct LiveStream(AsyncLiveStream);
-
-impl LiveStream {
-    pub fn new(options: LiveStreamOptions) -> Result<Self, VideoError> {
-        Ok(Self(AsyncLiveStream::new(options)?))
-    }
-}
-
-impl Stream for LiveStream {
-    fn chunk(&self) -> Result<Option<Vec<u8>>, VideoError> {
-        use crate::stream::Stream;
-        Ok(block_async!(self.0.chunk())?)
-    }
-}
-
-impl std::ops::Deref for LiveStream {
-    type Target = AsyncLiveStream;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl std::ops::DerefMut for LiveStream {
+impl std::ops::DerefMut for Stream {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
