@@ -1040,20 +1040,6 @@ pub fn is_rental(player_response: &serde_json::Value) -> bool {
             .is_some()
 }
 
-pub fn is_not_yet_broadcasted(player_response: &serde_json::Value) -> bool {
-    let playability = player_response.get("playabilityStatus");
-
-    if playability.is_none() {
-        return false;
-    }
-
-    playability
-        .and_then(|x| x.get("status"))
-        .and_then(|x| x.as_str())
-        .unwrap_or("")
-        == "LIVE_STREAM_OFFLINE"
-}
-
 pub fn is_play_error(player_response: &serde_json::Value, statuses: Vec<&str>) -> bool {
     let playability = player_response
         .get("playabilityStatus")
@@ -1230,15 +1216,6 @@ pub async fn get_html(
     }
 
     Ok(response_first.unwrap())
-}
-
-pub fn time_to_ms(duration: &str) -> usize {
-    let mut ms = 0;
-    for (i, curr) in duration.split(':').rev().enumerate() {
-        ms += curr.parse::<usize>().unwrap_or(0) * (u32::pow(60_u32, i as u32) as usize);
-    }
-    ms *= 1000;
-    ms
 }
 
 pub fn parse_abbreviated_number(time_str: &str) -> usize {

@@ -2,14 +2,14 @@ use std::sync::Arc;
 
 use scraper::{Html, Selector};
 
-use crate::constants::{BASE_URL, FORMATS};
+use crate::constants::BASE_URL;
 use crate::info_extras::get_media;
 use crate::stream::{Stream, StreamOptions};
-use crate::structs::{VideoError, VideoFormat, VideoInfo, VideoOptions};
+use crate::structs::{VideoError, VideoInfo, VideoOptions};
 
 use crate::utils::{
-    add_format_meta, choose_format, clean_video_details, get_functions, get_html, get_html5player,
-    get_video_id, is_not_yet_broadcasted, is_play_error, is_private_video,
+    choose_format, clean_video_details, get_functions, get_html, get_html5player,
+    get_video_id, is_play_error, is_private_video,
     is_rental, parse_video_formats, sort_formats,
 };
 
@@ -158,7 +158,6 @@ impl Video {
 
         if player_response.get("streamingData").is_none()
             || is_rental(&player_response)
-            || is_not_yet_broadcasted(&player_response)
         {
             return Err(VideoError::VideoSourceNotFound);
         }
@@ -183,8 +182,6 @@ impl Video {
     /// Try to get full information about video
     /// - `HLS` and `DashMPD` formats included!
     pub async fn get_info(&self) -> Result<VideoInfo, VideoError> {
-        let client = &self.client;
-
         let mut info = self.get_basic_info().await?;
 
         // Last sort formats
