@@ -14,46 +14,6 @@ use crate::structs::{
     VideoOptions, VideoQuality, VideoSearchOptions,
 };
 
-pub fn get_cver(info: &serde_json::Value) -> &str {
-    info.get("responseContext")
-        .and_then(|x| x.get("serviceTrackingParams"))
-        .unwrap()
-        .as_array()
-        .and_then(|x| {
-            let index = x
-                .iter()
-                .position(|r| {
-                    r.as_object()
-                        .map(|c| c.get("service").unwrap().as_str().unwrap() == "CSI")
-                        .unwrap_or(false)
-                })
-                .unwrap();
-            x.get(index)
-                .unwrap()
-                .as_object()
-                .and_then(|x| {
-                    let second_array = x.get("params").unwrap().as_array().unwrap();
-                    let second_index = second_array
-                        .iter()
-                        .position(|r| {
-                            r.as_object()
-                                .map(|c| c.get("key").unwrap().as_str().unwrap() == "cver")
-                                .unwrap_or(false)
-                        })
-                        .unwrap();
-                    second_array
-                        .get(second_index)
-                        .unwrap()
-                        .as_object()
-                        .unwrap()
-                        .get("value")
-                })
-                .unwrap()
-                .as_str()
-        })
-        .unwrap()
-}
-
 pub fn get_html5player(body: &str) -> Option<String> {
     let html5player_res = Regex::new(r#"<script\s+src="([^"]+)"(?:\s+type="text\\//javascript")?\s+name="player_ias\\//base"\s*>|"jsUrl":"([^"]+)""#).unwrap();
     let caps = html5player_res.captures(body).unwrap();
@@ -1366,17 +1326,6 @@ pub fn normalize_ip(ip: impl Into<String>) -> Vec<u16> {
     }
 
     full_ip
-}
-
-pub fn make_absolute_url(base: &str, url: &str) -> Result<url::Url, VideoError> {
-    match url::Url::parse(url) {
-        Ok(u) => Ok(u),
-        Err(e) if e == url::ParseError::RelativeUrlWithoutBase => {
-            let base_url = url::Url::parse(base).map_err(VideoError::URLParseError)?;
-            Ok(base_url.join(url)?)
-        }
-        Err(e) => Err(VideoError::URLParseError(e)),
-    }
 }
 
 pub fn time_to_ms(duration: &str) -> usize {

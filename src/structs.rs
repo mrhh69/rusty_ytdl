@@ -157,27 +157,6 @@ pub enum VideoError {
     /// Invalid IPv6 subnet
     #[error("Invalid IPv6 subnet")]
     InvalidIPv6Subnet,
-    /// M3U8 parse error
-    #[error("M3U8 Parse Error: {0}")]
-    M3U8ParseError(String),
-    /// URL is not playlist
-    #[error("{0} is not a playlist URL")]
-    IsNotPlaylist(String),
-    /// Playlist body cannot parsed
-    #[error("Playlist body cannot parsed")]
-    PlaylistBodyCannotParsed,
-    /// Download error
-    #[error("Download Error: {0}")]
-    DownloadError(String),
-    /// Decryption error
-    #[error("Decryption Error: {0}")]
-    DecryptionError(String),
-    /// Hex encdode error
-    #[error(transparent)]
-    HexError(#[from] hex::FromHexError),
-    /// Child process error
-    #[error("Process Error: {0}")]
-    ChildProcessError(String),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

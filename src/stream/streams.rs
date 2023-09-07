@@ -1,14 +1,6 @@
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
-
-use async_trait::async_trait;
-use m3u8_rs::parse_media_playlist;
 use tokio::sync::RwLock;
 
-use super::remote_data::RemoteData;
-use super::segment::Segment;
-
 use crate::constants::DEFAULT_HEADERS;
-use crate::utils::{get_html, make_absolute_url};
 use crate::VideoError;
 
 pub struct StreamOptions {
