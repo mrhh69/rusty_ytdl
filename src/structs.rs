@@ -129,12 +129,6 @@ pub enum VideoError {
     /// Format not found
     #[error("Format not found")]
     FormatNotFound,
-    /// Invalid IPv6 format
-    #[error("Invalid IPv6 format")]
-    InvalidIPv6Format,
-    /// Invalid IPv6 subnet
-    #[error("Invalid IPv6 subnet")]
-    InvalidIPv6Subnet,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
