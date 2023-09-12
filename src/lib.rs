@@ -7,9 +7,6 @@ mod utils;
 
 pub mod constants;
 
-#[cfg(feature = "blocking")]
-pub mod blocking;
-
 pub use info::Video;
 pub use structs::{
     Author, Chapter, ColorInfo, DownloadOptions, Embed, RangeObject, RelatedVideo, RequestOptions,
