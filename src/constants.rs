@@ -27,13 +27,6 @@ pub const VIDEO_ENCODING_RANKS: &[&str] = &[
     "H.264",
 ];
 
-pub(crate) static DEFAULT_HEADERS: Lazy<reqwest::header::HeaderMap> = Lazy::new(|| {
-    let mut headers = reqwest::header::HeaderMap::new();
-    headers.insert(reqwest::header::USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Safari/537.36".parse().unwrap());
-
-    headers
-});
-
 pub(crate) static PARSE_INT_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r#"(?m)^\s*((\-|\+)?[0-9]+)\s*"#).unwrap());
 

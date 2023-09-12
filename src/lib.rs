@@ -6,7 +6,6 @@ mod structs;
 mod utils;
 
 pub mod constants;
-pub mod stream;
 
 #[cfg(feature = "blocking")]
 pub mod blocking;

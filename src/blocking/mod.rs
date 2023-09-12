@@ -1,7 +1,5 @@
 mod info;
 
-pub mod stream;
-
 use once_cell::sync::Lazy;
 use tokio::runtime::Runtime;
 
